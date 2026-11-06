@@ -53,8 +53,7 @@ class MediTimerApp extends StatelessWidget {
   }
 }
 
-class MediTimerAppBar extends StatelessWidget
-    implements PreferredSizeWidget {
+class MediTimerAppBar extends StatelessWidget implements PreferredSizeWidget {
   const MediTimerAppBar({super.key});
 
   @override

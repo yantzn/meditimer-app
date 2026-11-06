@@ -35,11 +35,12 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.47.9'
           cache: true
       - name: Record SDK version
         run: flutter --version
       - name: Resolve dependencies
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
       - name: Formatting
         run: dart format --output=none --set-exit-if-changed lib test
       - name: Analyzer
@@ -52,12 +53,6 @@ jobs:
           name: flutter-pubspec-lock
           path: pubspec.lock
           retention-days: 7
-      - name: Print lockfile for initial reproducibility review
-        if: success()
-        run: |
-          echo "=== BEGIN GENERATED PUBSPEC LOCKFILE ==="
-          cat pubspec.lock
-          echo "=== END GENERATED PUBSPEC LOCKFILE ==="
 
   android-debug-build:
     name: Android debug APK build
@@ -75,11 +70,12 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.47.9'
           cache: true
       - name: Generate official Flutter Android/iOS platform scaffolds
         run: flutter create --project-name=meditimer --org=dev.meditimer --platforms=android,ios --no-pub .
       - name: Resolve dependencies
-        run: flutter pub get
+        run: flutter pub get --enforce-lockfile
       - name: Build Android debug APK
         run: flutter build apk --debug
       - name: Upload debug APK and generated native scaffolds

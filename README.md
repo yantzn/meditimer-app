@@ -34,7 +34,7 @@ MEDI-31でFlutterの最小画面とWidgetテストを追加しました。GitHub
 - `Flutter format, analyze, test`：整形・静的解析・Unit/Widget Testを実行する
 - `Android debug APK build`：公式CLIでAndroid/iOS雛形を生成し、AndroidデバッグAPKをビルドする
 
-`flutter_lints`、`lib/main.dart`、`test/`は追加済みです。`pubspec.lock`、`android/`、`ios/`の公式Flutter生成物を検証し、後続コミットで管理対象に追加する必要があります。手順は[Windows初期構築ガイド](docs/windows-flutter-setup.md)を参照してください。
+`flutter_lints`、`lib/main.dart`、`test/`、`pubspec.lock`は追加済みです。`android/`、`ios/`の公式Flutter生成物は別途検証し、後続コミットで管理対象に追加する必要があります。手順は[Windows初期構築ガイド](docs/windows-flutter-setup.md)を参照してください。
 
 ## 開発運用
 

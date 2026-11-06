@@ -15,7 +15,7 @@ python3 scripts/validate_quality_policy.py
 Flutter SDKを導入した環境で：
 
 ```bash
-flutter pub get # 生成したpubspec.lockをコミット後、CIでは--enforce-lockfileへ変更
+flutter pub get --enforce-lockfile
 dart format --output=none --set-exit-if-changed lib test
 flutter analyze --fatal-infos
 flutter test --coverage
@@ -50,8 +50,8 @@ AIの判定は**問題の発見支援**であり、自動的な安全性認証�
 
 サードパーティGitHub Actionの固定SHA、Dependabotの更新方針も定期的に確認する。ロールバック・公開手順が決まるまでは自動マージやデプロイを導入しない。
 
-## MEDI-31移行期間の未完了項目
+## MEDI-31で残る作業
 
-`pubspec.lock`と`android/`・`ios/`の公式Flutter生成物は、GitHub Actionsの成果物またはWindowsの`scripts/bootstrap_flutter.ps1`で生成後、検証してリポジトリにコミットする。初期CIでは`flutter pub get`を実行し、lockfileを成果物として保存する。lockfileコミット後は`--enforce-lockfile`と構造バリデータの必須チェックを再有効化する。
+`pubspec.lock`は公式Flutter SDK 3.47.9のCI実行結果から生成・コミット済みです。CIで`--enforce-lockfile`を使って依存関係を固定します。`android/`・`ios/`の公式生成物は、GitHub Actionsの成果物またはWindowsの`scripts/bootstrap_flutter.ps1`で生成後、検証してリポジトリにコミットする必要があります。
 
 Windowsでのエミュレーター手順：[初期構築ガイド](windows-flutter-setup.md)。iOS Simulator検証はMEDI-34、iOS／Android実機受入はMEDI-36。Android APKビルドが成功してもエミュレーター上での操作確認やiOS実機動作は未実施である。

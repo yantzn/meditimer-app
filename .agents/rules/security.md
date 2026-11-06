@@ -1,15 +1,15 @@
-# Security and privacy rules
+# セキュリティ・プライバシー規約
 
-Threat model: [docs/security-threat-model.md](../../docs/security-threat-model.md). Do not claim a technical control exists until it is implemented and tested.
+脅威モデル：[docs/security-threat-model.md](../../docs/security-threat-model.md)。実装・テストしていない対策を「導入済み」と記載しない。
 
-- Every family/child/event query must enforce server-side least-privilege membership, not rely on client-side filters or user-supplied IDs.
-- Cross-family reads, writes and membership escalation must be **denied by default** and tested under the Firebase emulator before sync is released.
-- Authn and entitlement are different: payment does not imply access to somebody else's records. Family access cannot be granted by client-generated role assertions.
-- Treat child names, symptoms, timestamps and medication details as sensitive. Do not log them, upload real traces, embed in analytics, share crash payloads or commit sample screenshots containing real data.
-- Distinguish client config (Firebase web/API key) from privileged credentials. Never commit service account JSON, signing keys, tokens, keystores, certificates, .env with secrets or access refresh tokens.
-- Review secure local storage, encryption and backup behavior for selected implementation. Do not assume SQLite/OS backup provides required at-rest protection.
-- Preserve records and audit history through offline retries and conflicts; use immutable IDs, idempotent operations and explicit sync statuses.
-- Validate security rules with emulator tests for anonymous request, valid family member, unauthorized family, revoked member, and forged membership.
-- Do not embed admin SDKs or secrets in mobile clients. Review any offline cache exposure on logout, device transfer and family exit.
-- Pin/version dependencies; scrutinize dependency updates, GitHub Action permissions and untrusted PR inputs. CI token permissions must be read-only unless necessary.
-- Security review must return file/line, attack scenario, severity, tests and residual risk; it cannot establish compliance by itself.
+- 家族／児童／記録の全読み書きは、サーバー側で最小権限の所属認可を実施する。クライアントの表示制御や利用者指定IDを認可根拠にしない。
+- 他家庭への読み書き、所属ロールの不正昇格は**デフォルト拒否**とし、家族同期の公開前にFirebase Emulatorで否定テストを実施する。
+- 認証と課金権利は別概念。支払いは他家庭データへのアクセス権限を意味しない。利用者から送信されたrole指定だけで権限を発行しない。
+- 子どもの氏名、症状、日時、薬剤情報は機微なデータ。実データをログ・分析・クラッシュレポート・サンプル画像・外部AIプロンプトへ送らない。
+- Firebaseの公開用クライアント設定と権限付き秘密鍵を区別する。サービスアカウントJSON、署名鍵、Token、Keystore、秘密を含む`.env`をコミットしない。
+- ローカル保存の暗号化、鍵保護、端末バックアップ、機種変更時の保護を技術採用時に検証する。SQLiteやOS標準バックアップだけで十分と決めつけない。
+- オフライン・再試行・競合時にも記録・監査履歴を失わない。イベントIDの一意性、冪等性、同期状態の明示を設計する。
+- 認可テストは未認証、正規家族、他家族、権限失効、所属偽装の各ケースを含む。
+- モバイルアプリへ管理者SDKや秘密情報を埋め込まない。ログアウト、家族脱退、端末譲渡時のキャッシュ残存も検証する。
+- GitHub ActionsのToken権限最小化、依存関係更新、未信頼PR入力、サプライチェーンリスクをレビューする。
+- セキュリティレビューにはファイル・行、攻撃経路、重大度、修正案、テスト、残存リスクを記載する。AIだけで法令遵守を保証しない。

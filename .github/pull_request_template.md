@@ -1,40 +1,40 @@
-## Jira and scope
+## Jira・変更範囲
 
-- Work item: MEDI-___
-- Purpose / user impact:
-- Scope and non-scope:
-- Affected SRS requirement IDs:
+- 対象チケット：MEDI-___
+- 目的・利用者への影響：
+- 対象範囲／対象外：
+- 関連するSRS要件ID：
 
-## Implementation and verification
+## 実装・検証チェック
 
-- [ ] Changes match Jira acceptance criteria and current Confluence SRS
-- [ ] No unreviewed medical/safety claim or interval calculation
-- [ ] No cross-family data exposure, silent overwrite or lost recording
-- [ ] iOS and Android behavior considered
-- [ ] Unit/widget/integration tests added or justified
-- [ ] Dart format/analyze/test results provided **if Flutter exists**
-- [ ] Any skipped checks listed with reason (not marked passed)
-- [ ] No secrets or real child/medication records added
+- [ ] Jira受入基準と現行Confluence要件定義書に整合している
+- [ ] 投薬許可と誤認される表示や、未確認の投薬時間計算がない
+- [ ] 他家庭への不正アクセス、無断上書き、投薬実績の消失がない
+- [ ] iOS・Android両方の動作を考慮した
+- [ ] Unit/Widget/Integration Testを追加、または不要な理由を説明した
+- [ ] Flutterアプリが存在する場合、Dart整形・解析・テスト結果を記載した
+- [ ] 未実行の検証は理由とともに「未実行」とした（合格扱いしない）
+- [ ] 秘密情報や実際の子どもの健康・投薬情報を含めていない
 
-### Commands and evidence
+### 実行コマンドと証跡
 
 ```text
-<exact commands executed and results; write "not run" where appropriate>
+実際に実行したコマンドと結果を記載。未実行の場合は「未実行」と明記。
 ```
 
-## AI / self review
+## AIレビュー・自己レビュー
 
-- [ ] Read AGENTS.md and related .agents/rules/ files
-- [ ] Run /flutter-code-review for Flutter changes
-- [ ] Run /medication-safety-review for medication/time changes
-- [ ] Run /security-review for sync/auth/storage/telemetry changes
-- [ ] Run /test-design for regression gaps
-- [ ] Include actual findings with severity, file:line, reproduction and status
-- [ ] Critical/High findings addressed and reverified
+- [ ] `AGENTS.md`と変更に関連する`.agents/rules/`を読んだ
+- [ ] Flutter変更には`flutter-code-review`を使用した
+- [ ] 投薬・日時変更には`medication-safety-review`を使用した
+- [ ] 認証・同期・保存・計測変更には`security-review`を使用した
+- [ ] テスト観点の不足には`test-design`を使用した
+- [ ] 指摘の重大度・ファイル:行・再現手順・対応状況を記載した
+- [ ] Critical/Highの指摘を解消し再検証した
 
-## Deployment / rollback and unresolved risks
+## リリース・ロールバック・残存リスク
 
-- Data migration or persistence impact:
-- Offline and sync behavior:
-- Residual risks and open questions:
-- Follow-up ticket (if needed):
+- データ移行や永続化への影響：
+- オフライン・同期への影響：
+- 残存リスク／未解決事項：
+- 後続Jiraチケット（ある場合）：

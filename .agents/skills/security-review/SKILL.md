@@ -1,16 +1,18 @@
 ---
 name: security-review
-description: Reviews child-health data security, cross-family Firestore authorization, credentials, logging, offline retention and CI supply chain; use for sync/auth/storage/PR security changes.
+description: 子どもの健康情報、家族間のFirestore認可、秘密情報、ログ、オフライン保管、CIのサプライチェーンをレビューする。認証・同期・保存変更で使用する。
 ---
 
-# Security review
+# セキュリティレビュースキル
 
-1. Read `AGENTS.md`, `.agents/rules/security.md`, `docs/security-threat-model.md` and the Jira issue.
-2. Map identities, family membership, child ownership, trust boundaries, local cache and Firestore document paths touched by the change.
-3. Attempt malicious scenarios: anonymous read; user A reads/writes user B's family; forged role; revoked member still writes; unauthenticated invite; child moved between families; stale offline cache; duplicate sync.
-4. Inspect data exposure in logs, crash reporting, screenshots, telemetry, backups and network calls. Check keys and tokens are not committed.
-5. For Security Rules, require Firebase Emulator positive **and negative** tests. Do not treat mobile UI checks as authorization.
-6. Check GitHub Actions token scope, untrusted input usage, dependencies, lockfiles and secret-scanning process.
-7. Document exploits, file:line and test evidence; mark untested assumptions explicitly. Critical unauthorized data access is a release blocker.
+1. `AGENTS.md`、`.agents/rules/security.md`、`docs/security-threat-model.md`と対象Jiraチケットを確認する。
+2. ユーザー認証、家族所属、児童所有者、クライアント／クラウドの信頼境界、ローカルキャッシュ、変更対象のFirestoreパスを整理する。
+3. 未認証アクセス、家族Aから家族Bへの読み書き、ロール偽造、権限剥奪後の更新、不正招待、別家庭への児童移動、古いキャッシュ、重複同期を攻撃者視点で検証する。
+4. ログ、クラッシュレポート、画像、分析、バックアップ、通信に個人情報が露出しないか調べ、鍵・Token・サービスアカウントの混入を確認する。
+5. Firestore Security Rules変更にはFirebase Emulatorで**許可系・拒否系**の両テストを要求する。UI側の非表示は認可対策とみなさない。
+6. GitHub Actionsの最小権限、未信頼入力、依存関係、Lockfile、秘密情報検出を点検する。
+7. コード位置と攻撃前提、実証結果、影響、修正案、回帰テストを示す。別家庭へのアクセスを許す欠陥はCriticalとし、マージを止める。
 
-Output: findings with Critical/High/Medium/Low, attack preconditions, evidence, affected scope, concrete remediation and regression test; then residual risks and checks actually executed.
+## 出力形式
+
+日本語で **重大度／ファイル:行／攻撃シナリオ／根拠／影響範囲／修正案／回帰テスト／残存リスク** を記載し、実行していない検証は未実行とする。

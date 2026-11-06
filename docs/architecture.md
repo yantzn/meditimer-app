@@ -1,33 +1,33 @@
-# Architecture principles (draft — MEDI-2 PoC pending)
+# アーキテクチャ方針（ドラフト：MEDI-2のPoC未完了）
 
-Status: **proposed**, not yet implemented. Required products: iOS and Android. No permanent application backend is required if the managed cloud solution is viable.
+**状態：候補設計。未実装・未確定。** 対象OSはiOSとAndroid。マネージドサービスによる家族共有が成立するなら、自前の常設アプリケーションサーバーは設置しない方針を検討する。
 
-## Logical boundaries
+## 論理的な構成
 
 ```text
-Flutter UI / ViewModels
-           |
-      Domain models
- (events, clocks, validation)
-           |
-       Repositories
-       /         \
-local SQLite    Sync adapter (P2 candidate Firestore)
-  (P1)           + Auth / membership / security rules
+Flutter UI / ViewModel（表示・操作）
+             |
+  Domain Model（イベント・Clock・検証）
+             |
+       Repository（データ取得／保存）
+          /               \
+ローカルSQLite        Sync Adapter（P2で候補検証）
+（P1の正本）              + 認証・家族所属・Security Rules
 ```
 
-- P1 is offline-first: logging, history, event correction, timer and PDF must work without network.
-- P2 synchronization is an eventual-consistency feature; records are local-first and marked queued/sent/acknowledged/conflicted/stale as appropriate. The protocol and exact statuses are subject to PoC.
-- Keep event IDs stable and changes auditable; distinguish administration time from save time and sync time. Prefer append-only fact/audit event semantics over silent overwrite.
-- P2 caregiver sharing must work across iOS and Android and prevent cross-family access via server-side authorization.
-- Subscription entitlement and family membership are separate; billing does not confer data access rights.
-- No medical recommendation algorithm; only caregiver-configured elapsed-time display and factual records.
+- **P1はオフラインファースト。** 投薬・体温・排尿・症状の記録、履歴、訂正、間隔表示、受診用PDFはネットワークなしで利用できるようにする。
+- **P2の家族同期は結果整合性を前提に設計する。** ローカル保存とクラウド反映を分け、未送信・送信中・反映済み・競合・古い状態などの扱いを明示する。状態名・プロトコルはPoC後に確定する。
+- イベントIDの一意性と監査可能な変更履歴を維持し、実投与日時・入力日時・同期日時を区別する。実績の黙示的な上書きを避け、追記・訂正イベント方式を検討する。
+- P2ではiOS/Android混在の家族共有を可能にし、サーバー側認可で別家庭の記録にアクセスできないようにする。
+- 課金権利と家族所属は別の概念として扱う。支払いだけで他者の記録にアクセスできてはならない。
+- 薬剤名や年齢から投薬の可否を判断しない。保護者が指定した間隔の経過時間と事実記録に限定する。
 
-## Evaluation gates
+## P0の技術判断ゲート
 
-- Flutter/Dart + Drift/SQLite + Firebase Authentication/Firestore Blaze are proposed, not accepted technology commitments.
-- Verify device persistence, migration, restored app state, clock abstraction, cross-platform SDK behavior, security rules in emulator, sync cost and quota behavior before adopting.
-- State management and dependency injection package choice must be an explicit, documented P0 decision.
-- Phase labels P0–P3 refer to roadmap, not fixed delivery dates.
+Flutter/Dart、Drift/SQLite、Firebase Authentication/Firestore Blazeは**候補**であって確定済みの採用技術ではない。
 
-Reference: [Flutter official architecture guidance](https://docs.flutter.dev/app-architecture/recommendations). Use as strong guidance, adapting to MediTimer's actual complexity.
+端末保存と復旧、マイグレーション、時計の注入、両OSでのSDK動作、Firebase Emulatorの認可拒否試験、同期原価、無料枠超過時の継続提供などを検証してから採否を決める。
+
+状態管理、依存性注入、画面遷移のライブラリもP0で根拠を文書化する。
+
+参考：[Flutter公式アーキテクチャ推奨事項](https://docs.flutter.dev/app-architecture/recommendations)

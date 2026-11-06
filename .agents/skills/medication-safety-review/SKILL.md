@@ -1,16 +1,18 @@
 ---
 name: medication-safety-review
-description: Reviews caregiver medication logging and interval displays against MediTimer safety invariants, including already-administered doses, clock changes and mixed medicine histories; use whenever medication or timing changes.
+description: MediTimerの投薬記録・設定間隔・過去訂正・異名薬剤履歴・時刻変更・家族未同期時の安全性を確認する。投薬関連コードや表示変更で使用する。
 ---
 
-# Medication safety review
+# 投薬記録の安全性レビュースキル
 
-1. Read `.agents/rules/medication-safety.md`, `AGENTS.md`, and related SRS/AC.
-2. Trace registration, correction, calculation and presentation from event -> repository -> ViewModel -> widget/PDF.
-3. Explicitly verify D-01, D-02, D-05, D-07 and every negative scenario in the rule. Check other-child context and family sync uncertainty.
-4. Inspect any timer for caregiver-entered **positive whole minutes, initially unset**; base on actual administered timestamp, not recordedAt or a hardcoded default.
-5. For different names/formulations, never infer same/different ingredient or a medically safe combination. For grouped medicines only show user-declared association.
-6. Check that out-of-interval doses remain loggable, with warning/context, and historical versions remain auditable.
-7. Specify at least one positive and one negative unit/widget test per changed invariant. Flag unverified clinical/legal assumptions separately.
+1. `.agents/rules/medication-safety.md`、`AGENTS.md`、対応するSRS・Jira受入基準を確認する。
+2. 投薬イベント→Repository→ViewModel→画面／PDFの流れを追い、登録・訂正・経過時間計算・表示まで確認する。
+3. **D-01、D-02、D-05、D-07**と、ルールに示した否定・境界値テストを必ず検証する。児童の取り違えと家族未同期状態も確認する。
+4. タイマーはユーザー指定の**正の整数分、初期値なし**であり、入力日時ではなく実投与日時に基づいているか確認する。
+5. 異なる薬名・剤形から成分の同一性や併用安全性を推定しない。関連薬グループは利用者が指定した関係だけを表す。
+6. 間隔不足の**実施済み投薬を記録可能**にし、警告と確認理由、訂正・監査履歴を保持する。
+7. 変更された不変条件ごとに正常系と異常系のUnit/Widget Testを最低1件ずつ提案する。医療・法規制の未確認事項は区別する。
 
-Format: **[Critical/High/Medium/Low] file:line** + user-facing consequence + required correction + regression test. A review result cannot grant medical clearance.
+## 指摘書式
+
+**[Critical/High/Medium/Low] ファイル:行**、保護者に生じる影響、必要な修正、追加する回帰テストを日本語で記載。レビューが医学的な投薬許可や安全性保証を行うものではないことを明示する。

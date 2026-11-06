@@ -1,4 +1,4 @@
-# Enabled when P1 Flutter bootstrap adds flutter_lints to pubspec.yaml.
+# Flutter初期化時に pubspec.yaml のdev_dependenciesへflutter_lintsを追加して有効化する。
 include: package:flutter_lints/flutter.yaml
 
 analyzer:

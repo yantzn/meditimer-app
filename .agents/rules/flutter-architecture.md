@@ -1,14 +1,14 @@
-# Flutter architecture — project rule
+# Flutterアーキテクチャ規約
 
-Source: https://docs.flutter.dev/app-architecture/recommendations
+参考：[Flutter公式アーキテクチャガイド](https://docs.flutter.dev/app-architecture/recommendations)
 
-- Separate presentation (widgets/screens and ViewModels) from data (repositories/services). Keep widgets declarative and free of database or medicine business logic.
-- Use unidirectional data flow and explicit state transitions. Favor immutable models, dependency injection and repository abstractions for local/remote data.
-- Keep domain-specific interval calculation, event reconciliation and time handling in independently testable pure code; never depend on `DateTime.now()` directly inside logic—inject a clock.
-- Store `occurredAt` (actual event time) separately from `recordedAt`, preserve timezone context, handle day rollover and time correction.
-- Keep app features isolated (`lib/features/<feature>/{data,domain,presentation}` is a suggested layout; exact structure is approved in P0). Prefer simple structure over premature layers.
-- Make async work cancellation/error/reporting explicit. Never silently swallow database or sync errors.
-- Reject UI code that substitutes mock state for persisted data after P1 implementation.
-- Design for iOS and Android: accessibility, large tap targets, screen-reader labels, dark/night mode, offline screens, local PDF export.
-- Per service/repository/ViewModel: unit tests; per screen: widget tests; per critical flow: integration tests. Verify crashes and data durability, not only happy paths.
-- State management, dependency injection, navigation and persistence packages are architecture decisions to be recorded in a Jira/Confluence ADR after PoC, not chosen implicitly by AI.
+- UI（Widget・画面・ViewModel）とデータ層（Repository・Service）の責務を分離する。Widgetの`build()`にDBアクセスや投薬業務ロジックを書かない。
+- 一方向データフロー、明示的な状態遷移、不変データモデル、依存性注入、Repository抽象を原則とする。
+- 経過時間の計算、投薬イベント照合、日時処理は単体テスト可能な純粋ロジックに分離する。`DateTime.now()`を業務ロジックに直接埋め込まず、Clockを注入する。
+- 実投与日時`occurredAt`と記録入力日時`recordedAt`は区別する。タイムゾーン・日付跨ぎ・時計補正を検証する。
+- 機能ごとに責務を分ける。構成例は`lib/features/<feature>/{data,domain,presentation}`。過度な抽象化は避け、実際のPoCを踏まえて採用する。
+- 非同期処理ではキャンセル、例外通知、再試行、リソース解放を明示し、DBや同期エラーを黙って握りつぶさない。
+- P1以降の画面では、DBに永続化されたデータの代わりにデモ用状態を正本として扱わない。
+- iOS/Android双方でアクセシビリティ、大きな操作領域、読み上げ、夜間表示、オフライン画面、ローカルPDFを検証する。
+- ロジックはUnit Test、画面はWidget Test、重要な記録フローはIntegration Testを用意する。正常系だけでなくクラッシュ・データ消失をテストする。
+- 状態管理・DI・ナビゲーション・永続化パッケージは、PoC後にADRへ採用理由を記録する。AIが独断で固定しない。

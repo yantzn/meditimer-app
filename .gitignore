@@ -1,4 +1,4 @@
-# Flutter / Dart
+# Flutter / Dart の生成ファイル
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
@@ -10,7 +10,7 @@ coverage/
 **/*.g.dart.tmp
 **/*.freezed.dart.tmp
 
-# Android / iOS build artifacts and local settings
+# Android / iOS のビルド成果物・ローカル設定
 android/local.properties
 android/key.properties
 *.keystore
@@ -22,7 +22,7 @@ ios/Pods/
 ios/Flutter/Generated.xcconfig
 ios/Flutter/flutter_export_environment.sh
 
-# Private data and credentials — NEVER commit
+# 個人情報・秘密情報（コミット禁止）
 .env
 .env.*
 !.env.example
@@ -36,7 +36,7 @@ private/
 *.sqlite3
 *.db
 
-# Editor / platform
+# エディタ・OS
 .DS_Store
 .idea/
 .vscode/*.log

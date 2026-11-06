@@ -1,4 +1,4 @@
 ---
 applyTo: "**/*.dart"
 ---
-For every Dart edit, apply [Flutter architecture](../../.agents/rules/flutter-architecture.md) and [medication safety](../../.agents/rules/medication-safety.md) as relevant. Separate UI from data/repository logic; inject time and dependencies; retain event/audit history. Show actual test evidence, not presumed success.
+Dartコードを変更するときは、[Flutterアーキテクチャ規約](../../.agents/rules/flutter-architecture.md)を適用し、関係する場合は[投薬安全規約](../../.agents/rules/medication-safety.md)も適用する。UIとRepositoryの責務を分離し、Clock・依存性を注入し、イベント原本と訂正・監査履歴を維持する。実際に実行したテスト結果を記載し、未実行の検証を合格としない。

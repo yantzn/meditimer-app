@@ -1,27 +1,30 @@
-# Medication safety invariants — MUST review
+# 投薬記録の安全性不変条件（必須）
 
-This project is a **log** for caregivers and clinicians, not a clinical decision support or prescription engine.
+本アプリは保護者と医療者への**事実記録支援**であり、投薬許可や診断を行うアプリではない。
 
-## P0/P1 critical acceptance
+## P0/P1の重要な受入条件
 
-- D-01: `before dose: check history` and `dose already administered: record fact` are distinct user flows. A dose already given must be recordable even if the configured interval has not elapsed; show an explicit warning and permit factual recording with context. Never lose the event.
-- D-07: `intervalMinutes` is caregiver entered, **integer > 0**, per medication preset; default is **unset**. Do not infer from drug name/age/weight. No timer when unset.
-- `referenceTime = most recent actual administeredAt + intervalMinutes` for the configured preset. Display the **elapsed-time reference**, not a medication authorization. Example: 01:30 + 330 min = 07:00, including midnight rollover.
-- D-02: P1: check same-preset timing and show all-medication history; do **not** assume medicines with different names have different active ingredients. P2: explicitly caregiver-associated related-medication groups, no automatic ingredient/interaction claims.
-- D-05: reject labels such as `投薬可能`, `投与して安全`, `脱水なし`, `併用してよい` and any equivalent unqualified claim.
-- Corrections must preserve immutable factual event versions, original timestamp, author and correction reason; deleted history must remain auditable.
-- Uncertain or unsynced family history cannot be presented as complete.
+- **D-01**：「投与前の記録確認」と「実際に投与済みの事実記録」は別フロー。設定間隔が経過していなくても、警告・理由確認の後に事実として保存できる。投与済みイベントを失わせない。
+- **D-07**：`intervalMinutes`は薬剤プリセットごとに利用者が設定する**正の整数（分）**。初期値は**未設定**。薬名・年齢・体重から推測しない。未設定ではタイマーを開始しない。
+- 基準日時は **直近の実投与日時 + `intervalMinutes`**。示すのは経過時間の基準であり、医学的な投与許可ではない。例：01:30＋330分＝07:00。日付跨ぎも正しく処理する。
+- **D-02**：P1では同一プリセットの間隔と全薬剤の履歴を確認する。異なる薬剤名から同一成分／別成分を断定しない。P2の関連薬剤は保護者による手動関連付けであり、自動成分・相互作用判定はしない。
+- **D-05**：「投薬可能」「投与して安全」「脱水なし」「併用してよい」など、根拠のない医学的安全性を保証する表現は禁止。
+- 訂正・取消では実績イベントの原本、投与日時、記録者、訂正理由・変更履歴を監査可能に残す。
+- 家族端末が未同期の場合、共有履歴が最新・完全であるかのように表示しない。
 
-## Mandatory negative scenarios
+## 必須の否定・境界値テスト
 
-1. Interval unset or 0: no countdown / validation failure.
-2. Dose at 01:30 + 5h30m: reference 07:00, not 05:15 or 06:00.
-3. Dose at 20:00 + 7h15m: next-day 03:15.
-4. Backdated dose with shorter-than-configured elapsed time: warning + factual record still saved.
-5. Different medicines not linked: no equivalence/safety assertion, all recent history still visible.
-6. Offline second caregiver: outdated state clearly marked, not falsely synchronized.
-7. Clock change, DST/timezone change, rapid double-tap and record correction: stable audit and recomputed display.
+1. 間隔未設定・0分・負数：タイマーを表示しない／入力検証エラー。
+2. 01:30投与＋5時間30分：表示基準は07:00。
+3. 20:00投与＋7時間15分：翌日03:15。
+4. 間隔不足の投与済み記録：警告と状況確認の後、実績は記録できる。
+5. 別名の未関連薬：安全・別成分の断定をせず、全薬の直近履歴を表示する。
+6. 他の保護者がオフライン：古い状態が見えている可能性を明示する。
+7. 端末時計・タイムゾーン変更、二重タップ、過去記録訂正：監査履歴を維持し表示を再計算する。
 
-Severity: false medication authorization, suppressed factual history, cross-child mix-up or undetected overwritten administration => **Critical**. Missing exception coverage, misleading clock, incomplete audit or misleading related-drug grouping => at least **High**, adjust with evidence.
+## 重大度
 
-Never substitute AI interpretation for medical or legal review.
+- **Critical**：投薬の医学的許可と誤認させる表示、実施済み投薬の記録拒否・消失、児童の取り違え、無検知の実績上書き。
+- **High以上**：日時の誤表示、訂正履歴欠落、関連薬の誤認を招く表示、必要な例外試験の欠落。根拠に応じて引き上げる。
+
+AIレビューは医療・法務上の確認に代わるものではない。

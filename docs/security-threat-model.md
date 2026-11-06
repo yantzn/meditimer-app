@@ -1,22 +1,24 @@
-# Security threat model (P0 draft)
+# セキュリティ脅威モデル（P0ドラフト）
 
-Scope: sensitive child profile, medication, symptoms, caregiver identity, offline cache and (P2) synchronized family history. This is a preliminary engineering threat model, **not** a compliance audit.
+対象：児童プロフィール、症状、投薬履歴、保護者の識別情報、端末内データ、P2の家族同期。これは**設計段階の脅威分析**であり、法令遵守・安全性の保証ではない。
 
-| Asset / boundary | Attacker scenario | Required mitigation | Verification |
+| 資産・境界 | 攻撃・事故の例 | 必要な対策 | 検証方法 |
 | --- | --- | --- | --- |
-| Family-scoped records | Authenticated family A reads/writes family B paths | Server-side family membership/least privilege; deny-by-default | Emulator negative tests for read/list/write |
-| Invitations | Forged invite, stolen or replayed token | Expiring/one-use invite design, securely validated grants, revocation | Invite abuse / rejoin tests |
-| Membership | Revoked caregiver keeps sync access | Authorization checks on every read/write; refresh/expunge cached access as designed | Post-revocation emulator tests |
-| Offline device | Lost/shared device leaks child record | Evaluate local encryption, device lock, logout cache, key storage and backups | Threat review on both OSs |
-| Event sync | Concurrent writes erase a dose | Immutable event IDs, audited corrections, idempotent retries, observable conflicts | Two-device offline-reconnect tests |
-| App logs/analytics | Names/meds exposed via crash/logs | Data-minimized telemetry and redaction; no raw sensitive values | Code review and synthetic trace check |
-| CI/repository | Commit leaks secrets or actions abused | No secrets in code, least privilege workflow permissions, dependency maintenance | Scanning and PR review |
-| Billing | Non-paying member accesses protected storage or paying member sees other family | Separate entitlement and family ACL; server rules always enforce membership | Entitlement vs authorization tests |
+| 家族ごとの記録 | 家族Aの利用者が家族Bのデータを読み書き | サーバー側の所属認可、最小権限、デフォルト拒否 | Emulatorの読取・一覧・書込拒否テスト |
+| 招待 | 偽造・盗難・再使用された招待 | 有効期限、使い捨て方式の検討、検証済み権限付与、失効処理 | 不正招待・再参加テスト |
+| 家族所属 | 権限解除後も書き込み可能 | 全操作で認可、キャッシュ・権限情報の更新または破棄 | 権限剥奪後の拒否テスト |
+| オフライン端末 | 紛失・共用端末からの情報流出 | ローカル暗号化、OSロック、ログアウト時の残存、鍵・バックアップ方針 | iOS/Androidでの脅威レビュー |
+| イベント同期 | 同時更新による投薬実績の消失 | 不変イベントID、監査付き訂正、冪等な再送、競合表示 | 2端末の通信断・復帰試験 |
+| ログ・分析 | 児童の名前や薬剤がクラッシュログに残る | 計測データ最小化、機微情報の除外・マスキング | 静的レビュー・合成データでのログ試験 |
+| CI・リポジトリ | 機密情報の混入、ワークフロー悪用 | 認証情報の非登録、最小権限、依存関係の更新 | Secret検知・PRレビュー |
+| 課金 | 課金済み利用者が別家庭の記録を閲覧 | 課金権利と家族所属の認可を分離 | 権利状態と認可の結合テスト |
 
-## Non-negotiable rules
+## 最低条件
 
-The application is *not* a diagnosis or drug-interaction engine. Avoid unvalidated clinical language. Do not place real child data in tests/fixtures or external AI prompts. Firestore rules must be tested in the emulator before P2 can pass. All denial tests must fail to access another family's data.
+アプリは診断・薬剤間相互作用判定をしない。実際の子どもの記録をテストデータや外部AIプロンプトに持ち込まない。P2の公開前にFirestore Security Rulesの認可拒否テストを実施し、**他家庭へのアクセスが拒否されること**を確認する。
 
-## Pending P0 decisions
+## 未確定事項
 
-Authentication provider, invite validation protocol, membership revocation latency, offline storage encryption/backup, analytics and crash telemetry providers, data retention/deletion policy, realistic SLO and incident response. Mark each as undecided until a review assigns an owner.
+認証方式、招待トークンの検証方法、権限解除の反映遅延、端末内の暗号化・バックアップ、クラッシュ計測、データ保存・削除期間、運用SLO、インシデント対応。
+
+いずれもP0で判断者と確認方法を明確にし、未決事項を「対応済み」と記載しない。

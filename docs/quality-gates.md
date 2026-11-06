@@ -1,15 +1,19 @@
-# Quality gates
+# 品質ゲート
 
-## Bootstrap / current reality
+## 初期状態とCIの意味
 
-Currently `README.md` and repository policy are being prepared, **not the Flutter app**. `repo-policy` runs the Python validation on every PR; `detect-flutter` reports a notice and the separate `flutter-checks` job is *skipped* until `pubspec.yaml` exists. A policy-only PR cannot claim Dart/Flutter tests passed.
+現在は規約・品質チェックを準備する段階で、**Flutterアプリ本体はまだありません**。
 
-Run policy checks locally:
+PRごとに`repo-policy`ジョブがPythonの規約検査を実行します。`detect-flutter`はFlutterの有無を明示し、`pubspec.yaml`が存在しない場合は`flutter-checks`が**スキップ（未実行）**となります。これはFlutterのテストが合格したことを意味しません。
+
+規約の構造検証をローカルで実行：
+
 ```bash
 python3 scripts/validate_quality_policy.py
 ```
 
-After initializing Flutter in MEDI-2/MEDI-10:
+MEDI-2/MEDI-10でFlutterアプリを作成した後：
+
 ```bash
 flutter pub get --enforce-lockfile
 dart format --output=none --set-exit-if-changed lib test
@@ -17,31 +21,31 @@ flutter analyze --fatal-infos
 flutter test --coverage
 ```
 
-Add `flutter_lints` to dev_dependencies; include committed `pubspec.lock`, `lib/main.dart`, `test/`, and test fixtures. Analysis options are already present.
+`flutter_lints`をdev_dependenciesへ追加し、`pubspec.lock`、`lib/main.dart`、`test/`をコミットする。解析設定は`analysis_options.yaml`を利用する。
 
-## Gates by level
+## 品質ゲート一覧
 
-| Gate | Applies | Automated | Release condition |
+| 品質ゲート | 適用時期 | 自動化 | 完了の考え方 |
 | --- | --- | --- | --- |
-| Agent/skill completeness | All PRs | Yes, Python | Must pass |
-| Dart formatting and static analysis | After Flutter bootstrap | Yes, CI | Must pass |
-| Unit and widget tests | After Flutter bootstrap | Yes, CI | Must pass |
-| Native iOS & Android smoke tests | P1 release | Not yet | Manual/CI integration evidence needed |
-| Firebase Security Rules emulator tests | P2 release | Not yet | Cross-family denies must pass |
-| Sync offline/conflict/revocation tests | P2 release | Not yet | Evidence required |
-| AI PR safety & security review | Relevant change | Manual invocation | Critical/High addressed |
-| Threat model / SaMD and legal review | Release | External review | Appropriate decision recorded |
+| AI指示・スキル構造の検査 | すべてのPR | Pythonで実行 | 必須 |
+| Dartの整形・静的解析 | Flutter初期化後 | GitHub Actions | 必須 |
+| Unit/Widget Test | Flutter初期化後 | GitHub Actions | 必須 |
+| iOS/Androidの実機スモーク試験 | P1リリース時 | 未整備 | 手動またはCIの証跡が必要 |
+| Firestore Security RulesのEmulator試験 | P2リリース時 | 未整備 | 別家庭へのアクセス拒否が必須 |
+| オフライン・競合・権限失効テスト | P2リリース時 | 未整備 | 実証が必要 |
+| AIによる投薬安全・セキュリティレビュー | 該当変更時 | 手動適用 | Critical/Highが未解決でないこと |
+| 医療機器該当性・法務確認 | リリース判断時 | 専門家確認 | 判断記録が必要 |
 
-## Reviewer severity policy
+## レビュー重大度
 
-- **Critical:** unsupported dosing permission; loss/refusal of already-administered facts; cross-family access; silent destructive sync conflict.
-- **High:** misleading timer, missing audit/correction history, unsafe role updates, untested rule change, privacy-sensitive logging.
-- **Medium / Low:** correctness, accessibility, resilience or maintainability issues with reduced impact.
+- **Critical：** 根拠のない投薬許可、実投薬記録の消失・保存拒否、他家庭アクセス、無検知の同期上書き。
+- **High：** 誤解を招くタイマー、訂正・監査履歴の欠落、危険な所属権限変更、未検証のSecurity Rules変更、健康情報のログ漏えい。
+- **Medium/Low：** その他の正確性、操作性、耐障害性、保守性に関する問題。
 
-AI review only flags potential violations; it is not an autonomous pass/fail certification. For review red-team cases see [ai-review-red-team.md](ai-review-red-team.md). Manual AI skill evaluation is not represented as a CI job.
+AIの判定は**問題の発見支援**であり、自動的な安全性認証ではない。危険な変更を見抜けるかどうかの検証ケースは[AIレビューのレッドチーム試験](ai-review-red-team.md)を参照する。これらは実行していない限り「試験合格」とは扱わない。
 
-## GitHub settings needed outside the repository
+## GitHubで別途設定が必要な項目
 
-Configure branch protection/ruleset for `main`: require PR, passing `Repository policy`, and (once Flutter exists) `Flutter format, analyze, test`; require human review if available. Do not turn on mandatory Flutter checks before app bootstrap. Review third-party action pinning and Dependabot security updates.
+`main`への直接pushを制限し、Pull Requestと必要なCIチェックを必須にする。Flutter初期化前に存在しないFlutterジョブをマージ必須条件にしない。ブランチ保護／Rulesetはリポジトリ設定から管理する。
 
-Do not introduce automatic merges or deployment until risk/rollback policies are agreed. Sensitive sample data must never appear in PR traces.
+サードパーティGitHub Actionの固定SHA、Dependabotの更新方針も定期的に確認する。ロールバック・公開手順が決まるまでは自動マージやデプロイを導入しない。

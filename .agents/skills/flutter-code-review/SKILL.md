@@ -1,18 +1,18 @@
 ---
 name: flutter-code-review
-description: Reviews Flutter/Dart changes for architecture boundaries, persistence, async safety, platform parity, testability and CI regressions; use for every app PR.
+description: Flutter・Dartの設計分離、永続化、非同期安全性、iOS/Android差分、テスト可能性、CI退行をレビューする。FlutterのPRで使用する。
 ---
 
-# Flutter code review
+# Flutterコードレビュースキル
 
-1. Read `AGENTS.md`, the Jira AC and `.agents/rules/flutter-architecture.md`.
-2. Inspect the **actual diff** and neighboring call paths, not just changed lines; identify new data models, services, widgets and generated code.
-3. Check UI/data separation, repository abstractions, dependency injection, state transitions and immutable models. Reject hidden business decisions in widget build methods.
-4. Review null safety, `async` lifecycle and cancellation, time provider injection, error feedback, transaction boundary and data-migration compatibility.
-5. Validate iOS/Android parity, night use, accessibility and offline behavior.
-6. Demand unit tests of logic, widget tests of flows, integration tests of data persistence; run `dart format --output=none --set-exit-if-changed .`, `flutter analyze`, `flutter test` when code exists.
-7. Additionally call medication-safety-review for medication/time changes and security-review for auth, sync, storage or logging changes.
+1. `AGENTS.md`、Jira受入基準、`.agents/rules/flutter-architecture.md`を読む。
+2. 変更差分だけでなく関連する呼び出し元・呼び出し先、モデル、Service、Repository、Widget、生成コードまで確認する。
+3. UIとデータの責務、DI、状態遷移、不変データモデル、一方向データフローを検証する。`build()`内の隠れた業務判断を指摘する。
+4. Null safety、`async`処理・キャンセル、Clock注入、例外表示、トランザクション、データ移行の後方互換性を確認する。
+5. iOS/Android差分、夜間操作、アクセシビリティ、オフライン動作を検証する。
+6. Unit/Widget/Integration Testの不足を特定し、Flutterコードが存在すれば`dart format`、`flutter analyze`、`flutter test`を実行する。
+7. 投薬・日時が関係する場合は`medication-safety-review`、認証・同期・保存・ログが関係する場合は`security-review`を併用する。
 
-## Output contract
+## レビュー結果の形式
 
-For each finding: **[Critical/High/Medium/Low] path:line — observed behavior; why it violates requirement; concrete reproduction/fix; missing test.** Include direct Jira/SRS references. Separate observed facts from suspected risks. State checks executed and skipped. If no findings, say "No issues found in inspected scope", not "safe" or "production ready".
+各指摘を**[Critical/High/Medium/Low] ファイル:行 — 事実・要件違反・影響・再現方法・修正案・不足テスト**で報告する。実装で確認した事実と仮説は区別する。実行した検証と未実行の検証を分ける。指摘なしの場合も「確認範囲では問題なし」と表現し、「安全保証」「本番利用可能」と断言しない。

@@ -1,41 +1,47 @@
 # MediTimer
 
-小児発熱・服薬セーフティロガー（MediTimer）— iOS / Android 向け、オフラインファーストの発熱・投薬**記録支援**アプリ。
+小児発熱・服薬セーフティロガー（MediTimer）は、iOS・Android向けの**オフラインファーストの発熱・投薬記録支援アプリ**です。
 
-> 開発準備中。医療上の投与可否・用量・併用可否を判定するアプリではありません。
+> 現在は開発準備段階です。本アプリは投薬の可否・推奨用量・薬剤の併用安全性を医学的に判定しません。
 
-## Project references
+## プロジェクト資料
 
-- [Jira MEDI](https://yantzn.atlassian.net/jira/core/projects/MEDI/board)
-- [System requirements (Confluence v0.4)](https://yantzn.atlassian.net/wiki/spaces/MFS/pages/14745601)
-- [UI mockup source / gap analysis](https://yantzn.atlassian.net/wiki/spaces/MFS/pages/14778369)
-- [Development roadmap](https://yantzn.atlassian.net/wiki/spaces/MFS/pages/14778427)
+- [Jira：MEDIプロジェクト](https://yantzn.atlassian.net/jira/core/projects/MEDI/board)
+- [システム要件定義書 v0.4（Confluence）](https://yantzn.atlassian.net/wiki/spaces/MFS/pages/14745601)
+- [画面モックと差分一覧](https://yantzn.atlassian.net/wiki/spaces/MFS/pages/14778369)
+- [開発ロードマップ](https://yantzn.atlassian.net/wiki/spaces/MFS/pages/14778427)
 
-## Current scope
+## フェーズごとの開発範囲
 
-P0: Flutter/Drift/Firestore feasibility, safety/regulatory review and operating-cost validation.
-P1: offline child, medication, symptom and temperature records; prescription interval history; clinic view/PDF.
-P2: cross-platform caregiver sync, manually linked medications, conflict-aware status.
-P3: premium entitlements and store releases.
+- **P0：** Flutter・ローカルDB・家族同期のPoC、医療安全と法的論点、継続的な運用原価の検証
+- **P1：** オフラインでの児童・薬剤・体温・症状・投薬実績記録、間隔の経過時間表示、受診用PDF
+- **P2：** iOS/Android混在の家族間同期、手動の関連薬グループ、競合・未同期状態の表示
+- **P3：** 有料プランの権利管理、両ストアでの公開と運用
 
-Flutter, local persistence, backend and monetization libraries are **candidates**, not final choices until P0 findings are reviewed.
+Flutter、ローカルDB、クラウドサービス、課金ライブラリは**P0技術検証で採否を決定する候補**です。事前に確定した技術として扱わないでください。
 
-## Quality policy
+## AI・開発品質の基本方針
 
-Read [AGENTS.md](AGENTS.md), [architecture](docs/architecture.md), [safety/security rules](.agents/rules/medication-safety.md) and [quality gates](docs/quality-gates.md) before making changes. Skills in `.agents/skills/` provide reusable review protocols. AI reviews **assist** but do not replace automated tests, human review, medical advice or regulatory assessment.
+変更前に[AGENTS.md](AGENTS.md)を読み、変更内容に応じて[Flutter設計規約](.agents/rules/flutter-architecture.md)、[投薬安全規約](.agents/rules/medication-safety.md)、[セキュリティ規約](.agents/rules/security.md)を確認してください。
 
-### CI bootstrap state
+`.agents/skills/`には、コードレビュー、セキュリティ、投薬安全、テスト設計の手順を置いています。**AIによるレビューは補助**であり、自動テスト・開発者レビュー・医療専門家や法務の判断を代替しません。
 
-This repository starts with only policy and tooling; there is no Flutter app or `pubspec.yaml` yet. The `repo-policy` CI job runs immediately. The `flutter-checks` job is **skipped, not passed**, until a Flutter project is added. Once bootstrapped, it runs format, analyzer and unit/widget tests on pull requests.
+### 現在のCIの状態
 
-Before opening a Flutter implementation PR, initialize the Flutter app and add `flutter_lints` as a dev dependency. Check in `pubspec.lock`, a `lib/main.dart` and `test/` tests. CI rejects an incomplete Flutter scaffold.
+現時点ではFlutterアプリ本体と`pubspec.yaml`はまだありません。PRでは次のように表示されます。
 
-## Workflow
+- `Repository policy`：リポジトリ規約の構造を検証する
+- `Flutter format, analyze, test`：Flutter初期化までは**スキップ（未実行）**する
+- Flutter初期化後：整形・静的解析・Unit/Widget TestをPRごとに実行する
 
-- Work items: Jira `MEDI`.
-- Branch: `feature/MEDI-123-description`, `fix/MEDI-123-description`, `docs/MEDI-123-description`, or `spike/MEDI-123-description`.
-- PR title: `[MEDI-123] Meaningful summary`.
-- Do not merge changes with unaddressed Critical/High safety or cross-household access findings.
-- No personal medication/child health data in repository, screenshots, sample fixtures or CI logs.
+Flutterを初期化するPRでは、`flutter_lints`、`pubspec.lock`、`lib/main.dart`、`test/`を用意してください。不完全なFlutter構成はCIで検出します。
 
-See [quality gates](docs/quality-gates.md) for local checks and the release checklist.
+## 開発運用
+
+- Jiraキー：`MEDI`
+- ブランチ例：`feature/MEDI-123-description`、`fix/MEDI-123-description`、`docs/MEDI-123-description`、`spike/MEDI-123-description`
+- PRタイトル例：`[MEDI-123] Implement medication preset`
+- Critical/Highの投薬安全・家族間認可に関する指摘は、解消・再検証するまでマージしない
+- 実際の子ども・保護者・薬剤・健康情報をリポジトリ、スクリーンショット、テストデータ、CIログに含めない
+
+具体的な実行方法と公開前の確認事項は[品質ゲート](docs/quality-gates.md)を参照してください。

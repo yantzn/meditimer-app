@@ -1,27 +1,29 @@
-# AI review red-team cases
+# AIレビューのレッドチーム試験ケース
 
-Use the four `.agents/skills/` review workflows against **synthetic**, non-production changes. This is a human-invoked exercise, not an automated CI result.
+`.agents/skills/`の4スキルが危険な実装を検知できるか、**架空のデータと検証用コード**を使用して確認する。
 
-| Case | Deliberately bad change | Expected severity | Required reviewer finding |
+これは手動でAIに適用する試験計画であり、**GitHub Actionsが自動でAIレビューを実施することを意味しない**。
+
+| ケース | あえて混入させる危険な変更 | 期待重大度 | AIレビューに求める指摘 |
 | --- | --- | --- | --- |
-| MED-S1 | Widget prints "投薬可能" just because elapsed time ≥ interval | Critical | A timer is not medical permission; replace with factual elapsed/reference time |
-| MED-S2 | Save rejects an already-administered dose when elapsed time is short | Critical | Warn and retain factual administered record and audit context |
-| MED-S3 | Hard-coded 6h for all medication presets | High | `intervalMinutes` must be explicit, positive, initially unset |
-| MED-S4 | Uses `recordedAt` instead of actual `administeredAt` for timer | High | Validate 01:30 + 330 minutes = 07:00 |
-| MED-S5 | Different drug names implicitly treated as safe together | Critical | No automatic equivalence or combination safety judgement |
-| SEC-S1 | Firestore rule allows any signed-in user to access all families | Critical | Deny-by-default membership check and emulator cross-family negative test |
-| SEC-S2 | Client claims `isOwner=true` for membership validation | Critical | Membership authority must be server-validated |
-| SEC-S3 | Crash log includes child name and medicine details | High | Redact/minimize sensitive telemetry |
-| DATA-S1 | Concurrent offline doses overwrite each other | Critical | Immutable event IDs, idempotent reconciliation and two-device test |
-| QA-S1 | PR says all tests pass although no `pubspec.yaml` exists | High | State Flutter checks were not run; don't imply verification |
+| MED-S1 | 間隔を経過しただけで「投薬可能」と表示する | Critical | 経過時間は医学的な投薬許可ではない |
+| MED-S2 | 設定間隔未満の実投与記録を保存拒否する | Critical | 警告後も実施済みの事実と監査情報を保存する |
+| MED-S3 | 薬剤ごとの設定を無視し6時間固定で計算する | High | `intervalMinutes`は任意設定・初期値なし |
+| MED-S4 | 実投与日時ではなく入力日時で時間を計算する | High | 01:30＋330分＝07:00を確認する |
+| MED-S5 | 異なる薬名なら併用して安全だと推定する | Critical | 成分・併用可否を自動判定しない |
+| SEC-S1 | Firestoreの認可が全ログインユーザーに全家庭データを許可する | Critical | 所属によるデフォルト拒否とEmulatorの否定テスト |
+| SEC-S2 | クライアントの`isOwner=true`を無条件に信じる | Critical | サーバー側で所属・権限を確認する |
+| SEC-S3 | クラッシュログに児童の氏名・薬剤詳細を出す | High | 健康情報のログ出力を除去する |
+| DATA-S1 | オフライン中の2端末の投薬実績が上書きで消える | Critical | 不変イベント、冪等な同期、2端末試験 |
+| QA-S1 | `pubspec.yaml`がないのにFlutterの全テストが成功したとPRに記載する | High | Flutterチェックは未実行と明示する |
 
-### Skill acceptance checklist
+## スキル検証の受入基準
 
-- [ ] Reviewer identifies each seeded issue with file/line and severity
-- [ ] Includes a concrete reproduction, correction and negative regression test
-- [ ] Clearly distinguishes observed code from hypothetical risk
-- [ ] Does not claim a medical safety guarantee
-- [ ] Notes the exact commands executed and checks not run
-- [ ] No Critical/High issue is silently dismissed
+- [ ] 各ケースの不適切な実装をファイル:行と重大度付きで検知できる
+- [ ] 再現手順、修正方針、異常系回帰テストを提示できる
+- [ ] 実際に確認したコードと推測・リスクを区別できる
+- [ ] AIによる医学的な安全性保証を主張しない
+- [ ] 実際の実行コマンドと未実行のチェックを正確に列挙する
+- [ ] Critical/Highの未解決問題を黙って却下しない
 
-Save evaluation evidence to the relevant MEDI issue/PR; failures improve rules or tests. **These cases are specifications for later manual validation, not evidence of a successful AI evaluation.**
+試験証跡はMEDI-30と対応するPRに残し、問題が見つかった場合は規約・スキル・テストを改訂する。**この文書の存在だけでスキル試験が成功したとは扱わない**。

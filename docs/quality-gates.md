@@ -2,9 +2,9 @@
 
 ## 初期状態とCIの意味
 
-現在は規約・品質チェックを準備する段階で、**Flutterアプリ本体はまだありません**。
+MEDI-31でFlutterの最小ソースとWidgetテストを追加しました。Flutterのネイティブ雛形とlockfileは公式CLIで生成・コミットする必要があります。
 
-PRごとに`repo-policy`ジョブがPythonの規約検査を実行します。`detect-flutter`はFlutterの有無を明示し、`pubspec.yaml`が存在しない場合は`flutter-checks`が**スキップ（未実行）**となります。これはFlutterのテストが合格したことを意味しません。
+PRごとに`repo-policy`が構造を検査し、`Flutter format, analyze, test`がDart解析とWidget Testを実行し、`Android debug APK build`が公式CLI生成のAndroid雛形でビルドを実施します。CIが成功したことはWindowsエミュレーターや実機で動いたことの証拠ではありません。
 
 規約の構造検証をローカルで実行：
 
@@ -12,10 +12,10 @@ PRごとに`repo-policy`ジョブがPythonの規約検査を実行します。`d
 python3 scripts/validate_quality_policy.py
 ```
 
-MEDI-2/MEDI-10でFlutterアプリを作成した後：
+Flutter SDKを導入した環境で：
 
 ```bash
-flutter pub get --enforce-lockfile
+flutter pub get # 生成したpubspec.lockをコミット後、CIでは--enforce-lockfileへ変更
 dart format --output=none --set-exit-if-changed lib test
 flutter analyze --fatal-infos
 flutter test --coverage
@@ -49,3 +49,9 @@ AIの判定は**問題の発見支援**であり、自動的な安全性認証�
 `main`への直接pushを制限し、Pull Requestと必要なCIチェックを必須にする。Flutter初期化前に存在しないFlutterジョブをマージ必須条件にしない。ブランチ保護／Rulesetはリポジトリ設定から管理する。
 
 サードパーティGitHub Actionの固定SHA、Dependabotの更新方針も定期的に確認する。ロールバック・公開手順が決まるまでは自動マージやデプロイを導入しない。
+
+## MEDI-31移行期間の未完了項目
+
+`pubspec.lock`と`android/`・`ios/`の公式Flutter生成物は、GitHub Actionsの成果物またはWindowsの`scripts/bootstrap_flutter.ps1`で生成後、検証してリポジトリにコミットする。初期CIでは`flutter pub get`を実行し、lockfileを成果物として保存する。lockfileコミット後は`--enforce-lockfile`と構造バリデータの必須チェックを再有効化する。
+
+Windowsでのエミュレーター手順：[初期構築ガイド](windows-flutter-setup.md)。iOS Simulator検証はMEDI-34、iOS／Android実機受入はMEDI-36。Android APKビルドが成功してもエミュレーター上での操作確認やiOS実機動作は未実施である。

@@ -23,42 +23,11 @@ jobs:
       - name: Validate agent/skill contract
         run: python3 scripts/validate_quality_policy.py
 
-  detect-flutter:
-    name: Detect Flutter scaffold
-    runs-on: ubuntu-latest
-    outputs:
-      present: ${{ steps.flutter.outputs.present }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - id: flutter
-        name: Check Flutter readiness
-        shell: bash
-        run: |
-          if [[ -f pubspec.yaml ]]; then
-            for required in pubspec.lock lib/main.dart; do
-              if [[ ! -f "$required" ]]; then
-                echo "::error::Flutter scaffold has pubspec.yaml but is missing $required"
-                exit 1
-              fi
-            done
-            if [[ ! -d test ]]; then
-              echo "::error::Flutter scaffold must include test/ before enabling CI"
-              exit 1
-            fi
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Flutter checks NOT RUN: pubspec.yaml does not yet exist. This is policy-bootstrap only."
-          fi
-
   flutter-checks:
     name: Flutter format, analyze, test
-    needs: [repo-policy, detect-flutter]
-    if: needs.detect-flutter.outputs.present == 'true'
+    needs: [repo-policy]
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -67,11 +36,59 @@ jobs:
         with:
           channel: stable
           cache: true
-      - name: Resolve dependencies (locked)
-        run: flutter pub get --enforce-lockfile
+      - name: Record SDK version
+        run: flutter --version
+      - name: Resolve dependencies
+        run: flutter pub get
       - name: Formatting
         run: dart format --output=none --set-exit-if-changed lib test
       - name: Analyzer
         run: flutter analyze --fatal-infos
       - name: Unit and widget tests
         run: flutter test --coverage
+      - name: Preserve generated lockfile for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-pubspec-lock
+          path: pubspec.lock
+          retention-days: 7
+      - name: Print lockfile for initial reproducibility review
+        if: success()
+        run: |
+          echo "=== BEGIN GENERATED PUBSPEC LOCKFILE ==="
+          cat pubspec.lock
+          echo "=== END GENERATED PUBSPEC LOCKFILE ==="
+
+  android-debug-build:
+    name: Android debug APK build
+    needs: [flutter-checks]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate official Flutter Android/iOS platform scaffolds
+        run: flutter create --project-name=meditimer --org=dev.meditimer --platforms=android,ios --no-pub .
+      - name: Resolve dependencies
+        run: flutter pub get
+      - name: Build Android debug APK
+        run: flutter build apk --debug
+      - name: Upload debug APK and generated native scaffolds
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-debug-and-scaffolds
+          path: |
+            build/app/outputs/flutter-apk/app-debug.apk
+            android/
+            ios/
+          include-hidden-files: true
+          retention-days: 7

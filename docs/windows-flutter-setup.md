@@ -21,7 +21,7 @@
 .\scripts\bootstrap_flutter.ps1
 ```
 
-このスクリプトは**公式Flutter CLI**で`android/`・`ios/`を生成し、`pubspec.lock`も作成します。既存ディレクトリや未コミットの変更がある場合は停止し、`--overwrite`を使いません。
+このスクリプトは公式Flutter CLIを**一時ディレクトリ**で実行し、生成した`android/`・`ios/`だけをリポジトリにコピーします。`pubspec.lock`はGitで管理済みで、依存取得は`--enforce-lockfile`で検証します。既存ディレクトリや未コミットの変更がある場合は停止し、`--overwrite`を使いません。
 
 `dev.meditimer`はPoCの仮パッケージ識別子です。商用公開前にAndroid Application ID／iOS Bundle IDを確定します。
 

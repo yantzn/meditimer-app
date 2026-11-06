@@ -72,8 +72,17 @@ jobs:
           channel: stable
           flutter-version: '3.47.9'
           cache: true
-      - name: Generate official Flutter Android/iOS platform scaffolds
-        run: flutter create --project-name=meditimer --org=dev.meditimer --platforms=android,ios --no-pub .
+      - name: Generate official Flutter native scaffolds outside the repository
+        shell: bash
+        run: |
+          temp_dir="$(mktemp -d)"
+          trap 'rm -rf "$temp_dir"' EXIT
+          flutter create --project-name=meditimer --org=dev.meditimer --platforms=android,ios --no-pub "$temp_dir/meditimer"
+          test -d "$temp_dir/meditimer/android"
+          test -d "$temp_dir/meditimer/ios"
+          cp -R "$temp_dir/meditimer/android" ./android
+          cp -R "$temp_dir/meditimer/ios" ./ios
+          echo "::notice::Generated native directories from an isolated Flutter template; repository pubspec.yaml remains unchanged."
       - name: Resolve dependencies
         run: flutter pub get --enforce-lockfile
       - name: Build Android debug APK

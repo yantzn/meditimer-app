@@ -1,0 +1,42 @@
+# Flutter / Dart の生成ファイル
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+**/*.g.dart.tmp
+**/*.freezed.dart.tmp
+
+# Android / iOS のビルド成果物・ローカル設定
+android/local.properties
+android/key.properties
+*.keystore
+*.jks
+*.mobileprovision
+*.p12
+*.p8
+ios/Pods/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+
+# 個人情報・秘密情報（コミット禁止）
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*service-account*.json
+*firebase-adminsdk*.json
+secrets/
+private/
+*.sqlite
+*.sqlite3
+*.db
+
+# エディタ・OS
+.DS_Store
+.idea/
+.vscode/*.log

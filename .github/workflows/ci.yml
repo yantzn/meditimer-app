@@ -23,42 +23,11 @@ jobs:
       - name: Validate agent/skill contract
         run: python3 scripts/validate_quality_policy.py
 
-  detect-flutter:
-    name: Detect Flutter scaffold
-    runs-on: ubuntu-latest
-    outputs:
-      present: ${{ steps.flutter.outputs.present }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - id: flutter
-        name: Check Flutter readiness
-        shell: bash
-        run: |
-          if [[ -f pubspec.yaml ]]; then
-            for required in pubspec.lock lib/main.dart; do
-              if [[ ! -f "$required" ]]; then
-                echo "::error::Flutter scaffold has pubspec.yaml but is missing $required"
-                exit 1
-              fi
-            done
-            if [[ ! -d test ]]; then
-              echo "::error::Flutter scaffold must include test/ before enabling CI"
-              exit 1
-            fi
-            echo "present=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "present=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::Flutter checks NOT RUN: pubspec.yaml does not yet exist. This is policy-bootstrap only."
-          fi
-
   flutter-checks:
     name: Flutter format, analyze, test
-    needs: [repo-policy, detect-flutter]
-    if: needs.detect-flutter.outputs.present == 'true'
+    needs: [repo-policy]
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -66,8 +35,11 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: '3.47.9'
           cache: true
-      - name: Resolve dependencies (locked)
+      - name: Record SDK version
+        run: flutter --version
+      - name: Resolve dependencies
         run: flutter pub get --enforce-lockfile
       - name: Formatting
         run: dart format --output=none --set-exit-if-changed lib test
@@ -75,3 +47,53 @@ jobs:
         run: flutter analyze --fatal-infos
       - name: Unit and widget tests
         run: flutter test --coverage
+      - name: Preserve generated lockfile for review
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-pubspec-lock
+          path: pubspec.lock
+          retention-days: 7
+
+  android-debug-build:
+    name: Android debug APK build
+    needs: [flutter-checks]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.9'
+          cache: true
+      - name: Generate official Flutter native scaffolds outside the repository
+        shell: bash
+        run: |
+          temp_dir="$(mktemp -d)"
+          trap 'rm -rf "$temp_dir"' EXIT
+          flutter create --project-name=meditimer --org=dev.meditimer --platforms=android,ios --no-pub "$temp_dir/meditimer"
+          test -d "$temp_dir/meditimer/android"
+          test -d "$temp_dir/meditimer/ios"
+          cp -R "$temp_dir/meditimer/android" ./android
+          cp -R "$temp_dir/meditimer/ios" ./ios
+          echo "::notice::Generated native directories from an isolated Flutter template; repository pubspec.yaml remains unchanged."
+      - name: Resolve dependencies
+        run: flutter pub get --enforce-lockfile
+      - name: Build Android debug APK
+        run: flutter build apk --debug
+      - name: Upload debug APK and generated native scaffolds
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-debug-and-scaffolds
+          path: |
+            build/app/outputs/flutter-apk/app-debug.apk
+            android/
+            ios/
+          include-hidden-files: true
+          retention-days: 7

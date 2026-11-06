@@ -28,13 +28,13 @@ Flutter、ローカルDB、クラウドサービス、課金ライブラリは**
 
 ### 現在のCIの状態
 
-現時点ではFlutterアプリ本体と`pubspec.yaml`はまだありません。PRでは次のように表示されます。
+MEDI-31でFlutterの最小画面とWidgetテストを追加しました。GitHub Actionsでは次の検査を行う構成です（合否はCI実行結果を参照）。
 
 - `Repository policy`：リポジトリ規約の構造を検証する
-- `Flutter format, analyze, test`：Flutter初期化までは**スキップ（未実行）**する
-- Flutter初期化後：整形・静的解析・Unit/Widget TestをPRごとに実行する
+- `Flutter format, analyze, test`：整形・静的解析・Unit/Widget Testを実行する
+- `Android debug APK build`：公式CLIでAndroid/iOS雛形を生成し、AndroidデバッグAPKをビルドする
 
-Flutterを初期化するPRでは、`flutter_lints`、`pubspec.lock`、`lib/main.dart`、`test/`を用意してください。不完全なFlutter構成はCIで検出します。
+`flutter_lints`、`lib/main.dart`、`test/`、`pubspec.lock`は追加済みです。`android/`、`ios/`の公式Flutter生成物は別途検証し、後続コミットで管理対象に追加する必要があります。手順は[Windows初期構築ガイド](docs/windows-flutter-setup.md)を参照してください。
 
 ## 開発運用
 
@@ -45,3 +45,5 @@ Flutterを初期化するPRでは、`flutter_lints`、`pubspec.lock`、`lib/main
 - 実際の子ども・保護者・薬剤・健康情報をリポジトリ、スクリーンショット、テストデータ、CIログに含めない
 
 具体的な実行方法と公開前の確認事項は[品質ゲート](docs/quality-gates.md)を参照してください。
+
+初期画面は技術検証用で、投薬・体温の記録や家族同期は**未実装**です。Androidエミュレーターでの画面操作確認は別途必要です。

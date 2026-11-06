@@ -1,0 +1,42 @@
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+coverage/
+**/*.g.dart.tmp
+**/*.freezed.dart.tmp
+
+# Android / iOS build artifacts and local settings
+android/local.properties
+android/key.properties
+*.keystore
+*.jks
+*.mobileprovision
+*.p12
+*.p8
+ios/Pods/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+
+# Private data and credentials — NEVER commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*service-account*.json
+*firebase-adminsdk*.json
+secrets/
+private/
+*.sqlite
+*.sqlite3
+*.db
+
+# Editor / platform
+.DS_Store
+.idea/
+.vscode/*.log

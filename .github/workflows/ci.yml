@@ -1,0 +1,77 @@
+name: CI quality gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repo-policy:
+    name: Repository policy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate agent/skill contract
+        run: python3 scripts/validate_quality_policy.py
+
+  detect-flutter:
+    name: Detect Flutter scaffold
+    runs-on: ubuntu-latest
+    outputs:
+      present: ${{ steps.flutter.outputs.present }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - id: flutter
+        name: Check Flutter readiness
+        shell: bash
+        run: |
+          if [[ -f pubspec.yaml ]]; then
+            for required in pubspec.lock lib/main.dart; do
+              if [[ ! -f "$required" ]]; then
+                echo "::error::Flutter scaffold has pubspec.yaml but is missing $required"
+                exit 1
+              fi
+            done
+            if [[ ! -d test ]]; then
+              echo "::error::Flutter scaffold must include test/ before enabling CI"
+              exit 1
+            fi
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Flutter checks NOT RUN: pubspec.yaml does not yet exist. This is policy-bootstrap only."
+          fi
+
+  flutter-checks:
+    name: Flutter format, analyze, test
+    needs: [repo-policy, detect-flutter]
+    if: needs.detect-flutter.outputs.present == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Resolve dependencies (locked)
+        run: flutter pub get --enforce-lockfile
+      - name: Formatting
+        run: dart format --output=none --set-exit-if-changed lib test
+      - name: Analyzer
+        run: flutter analyze --fatal-infos
+      - name: Unit and widget tests
+        run: flutter test --coverage
